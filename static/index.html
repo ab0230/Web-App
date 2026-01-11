@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PhotoShare - Share Your Moments</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;900&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #1a1a2e;
+            --accent: #ff6b6b;
+            --secondary: #4ecdc4;
+            --light: #f7f7f7;
+            --dark: #0f0f1e;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--dark);
+            color: var(--light);
+            overflow-x: hidden;
+        }
+
+        h1, h2, h3, h4 {
+            font-family: 'Playfair Display', serif;
+        }
+
+        /* Animated gradient background */
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #4facfe 75%, #00f2fe 100%);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
+        }
+
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Glass morphism effect */
+        .glass {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Floating animation */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .float {
+            animation: float 6s ease-in-out infinite;
+        }
+
+        /* Fade in animation */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in {
+            animation: fadeInUp 0.8s ease-out forwards;
+        }
+
+        .delay-1 { animation-delay: 0.2s; opacity: 0; }
+        .delay-2 { animation-delay: 0.4s; opacity: 0; }
+        .delay-3 { animation-delay: 0.6s; opacity: 0; }
+
+        /* Enhanced Button hover and click effects */
+        .btn-primary {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            transform: translateY(0);
+        }
+
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .btn-primary:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(255, 107, 107, 0.4);
+        }
+
+        /* Active/Click state for ALL buttons */
+        button:active, .btn-primary:active {
+            transform: translateY(1px) scale(0.98) !important;
+            box-shadow: 0 2px 10px rgba(255, 107, 107, 0.2) !important;
+            opacity: 0.9;
+        }
+
+        /* Glass button active state */
+        .glass:active {
+            background: rgba(255, 255, 255, 0.15) !important;
+            transform: scale(0.98);
+        }
+
+        /* Gradient text with backdrop for visibility */
+        .gradient-text {
+            display: inline-block;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 8px 32px;
+            color: #ff6b6b;
+            text-shadow: 0 0 30px rgba(255, 107, 107, 0.9),
+                         0 0 60px rgba(78, 205, 196, 0.6),
+                         0 4px 12px rgba(0, 0, 0, 0.8);
+            font-weight: 900;
+        }
+
+        /* Particle background */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .particle {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            animation: rise 10s infinite ease-in;
+        }
+
+        @keyframes rise {
+            0% {
+                bottom: -100px;
+                opacity: 0;
+            }
+            50% {
+                opacity: 1;
+            }
+            100% {
+                bottom: 100%;
+                opacity: 0;
+            }
+        }
+
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            animation: modalSlideIn 0.3s ease-out;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9) translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        /* Fix dropdown select options visibility */
+        select {
+            background-color: rgba(255, 255, 255, 0.05) !important;
+            color: #f7f7f7 !important;
+        }
+
+        select option {
+            background-color: #1a1a2e !important;
+            color: #f7f7f7 !important;
+            padding: 10px !important;
+        }
+
+        select option:hover {
+            background-color: #ff6b6b !important;
+        }
+
+        /* Input focus states */
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--accent) !important;
+            box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.1);
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--dark);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--accent);
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--secondary);
+        }
+    </style>
+</head>
+<body class="gradient-bg">
+    <!-- Particle Background -->
+    <div class="particles" id="particles"></div>
+
+    <!-- Navigation -->
+    <nav class="fixed w-full z-50 glass">
+        <div class="max-w-7xl mx-auto px-6 py-4">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center space-x-2">
+                    <svg class="w-8 h-8 text-accent" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd"/>
+                    </svg>
+                    <h1 class="text-2xl font-bold">PhotoShare</h1>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button onclick="openLoginModal()" class="px-6 py-2 rounded-lg glass hover:bg-white/10 transition-all">
+                        Login
+                    </button>
+                    <button onclick="openRegisterModal()" class="px-6 py-2 rounded-lg bg-accent hover:bg-accent/80 transition-all btn-primary">
+                        Sign Up
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="min-h-screen flex items-center justify-center px-6 pt-20">
+        <div class="max-w-5xl mx-auto text-center">
+            <div class="fade-in">
+                <h1 class="text-6xl md:text-8xl font-bold mb-6 leading-tight">
+                    Share Your<br>
+                    <span class="gradient-text">
+                        Moments
+                    </span>
+                </h1>
+            </div>
+            <p class="text-xl md:text-2xl mb-12 text-gray-300 fade-in delay-1">
+                A beautiful platform for creators to showcase their photography<br>
+                and for enthusiasts to discover stunning visual stories
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center fade-in delay-2">
+                <button onclick="openRegisterModal('creator')" class="px-8 py-4 rounded-lg bg-accent hover:bg-accent/80 text-lg font-semibold transition-all btn-primary">
+                    Become a Creator
+                </button>
+                <button onclick="openRegisterModal('consumer')" class="px-8 py-4 rounded-lg glass hover:bg-white/10 text-lg font-semibold transition-all">
+                    Explore Photos
+                </button>
+            </div>
+
+            <!-- Floating decorative elements -->
+            <div class="mt-20 relative h-64">
+                <div class="absolute top-0 left-1/4 w-32 h-32 bg-accent/20 rounded-full blur-3xl float"></div>
+                <div class="absolute bottom-0 right-1/4 w-40 h-40 bg-secondary/20 rounded-full blur-3xl float" style="animation-delay: 2s;"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="py-20 px-6">
+        <div class="max-w-6xl mx-auto">
+            <h2 class="text-5xl font-bold text-center mb-16">Why Choose PhotoShare?</h2>
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="glass rounded-2xl p-8 hover:bg-white/10 transition-all">
+                    <div class="w-16 h-16 bg-accent/20 rounded-full flex items-center justify-center mb-6">
+                        <svg class="w-8 h-8 text-accent" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"/>
+                            <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-4">Rich Metadata</h3>
+                    <p class="text-gray-300">Add titles, captions, locations, and tag people in your photos for better discoverability.</p>
+                </div>
+
+                <div class="glass rounded-2xl p-8 hover:bg-white/10 transition-all">
+                    <div class="w-16 h-16 bg-secondary/20 rounded-full flex items-center justify-center mb-6">
+                        <svg class="w-8 h-8 text-secondary" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-4">Smart Search</h3>
+                    <p class="text-gray-300">Find photos quickly with our powerful search across titles, locations, and people.</p>
+                </div>
+
+                <div class="glass rounded-2xl p-8 hover:bg-white/10 transition-all">
+                    <div class="w-16 h-16 bg-accent/20 rounded-full flex items-center justify-center mb-6">
+                        <svg class="w-8 h-8 text-accent" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M2 5a2 2 0 012-2h7a2 2 0 012 2v4a2 2 0 01-2 2H9l-3 3v-3H4a2 2 0 01-2-2V5z"/>
+                            <path d="M15 7v2a4 4 0 01-4 4H9.828l-1.766 1.767c.28.149.599.233.938.233h2l3 3v-3h2a2 2 0 002-2V9a2 2 0 00-2-2h-1z"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-4">Engage & Rate</h3>
+                    <p class="text-gray-300">Comment on photos, rate them, and connect with creators and fellow enthusiasts.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-12 px-6 glass mt-20">
+        <div class="max-w-6xl mx-auto text-center">
+            <div class="flex items-center justify-center space-x-2 mb-4">
+                <svg class="w-8 h-8 text-accent" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd"/>
+                </svg>
+                <h3 class="text-2xl font-bold">PhotoShare</h3>
+            </div>
+            <p class="text-gray-400 mb-4">Share Your Moments, Inspire the World</p>
+            <p class="text-sm text-gray-500">&copy; 2025 PhotoShare. Built with Azure Cloud Platform.</p>
+        </div>
+    </footer>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content glass rounded-2xl p-8 max-w-md w-full mx-4">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-3xl font-bold">Welcome Back</h2>
+                <button onclick="closeLoginModal()" class="text-gray-400 hover:text-white">
+                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                    </svg>
+                </button>
+            </div>
+            <form id="loginForm" onsubmit="handleLogin(event)">
+                <div class="mb-4">
+                    <label class="block text-sm font-semibold mb-2">Username</label>
+                    <input type="text" name="username" required class="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 focus:border-accent focus:outline-none transition-all">
+                </div>
+                <div class="mb-6">
+                    <label class="block text-sm font-semibold mb-2">Password</label>
+                    <input type="password" name="password" required class="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 focus:border-accent focus:outline-none transition-all">
+                </div>
+                <button type="submit" class="w-full px-6 py-3 rounded-lg bg-accent hover:bg-accent/80 font-semibold transition-all btn-primary">
+                    Login
+                </button>
+                <p class="text-center mt-4 text-sm text-gray-400">
+                    Don't have an account? <button type="button" onclick="switchToRegister()" class="text-accent hover:underline">Sign up</button>
+                </p>
+            </form>
+        </div>
+    </div>
+
+    <!-- Register Modal -->
+    <div id="registerModal" class="modal">
+        <div class="modal-content glass rounded-2xl p-8 max-w-md w-full mx-4">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-3xl font-bold">Join PhotoShare</h2>
+                <button onclick="closeRegisterModal()" class="text-gray-400 hover:text-white">
+                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                    </svg>
+                </button>
+            </div>
+            <form id="registerForm" onsubmit="handleRegister(event)">
+                <div class="mb-4">
+                    <label class="block text-sm font-semibold mb-2">Username</label>
+                    <input type="text" name="username" required class="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 focus:border-accent focus:outline-none transition-all">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-semibold mb-2">Email</label>
+                    <input type="email" name="email" required class="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 focus:border-accent focus:outline-none transition-all">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-semibold mb-2">Password</label>
+                    <input type="password" name="password" required class="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 focus:border-accent focus:outline-none transition-all">
+                </div>
+                <div class="mb-6">
+                    <label class="block text-sm font-semibold mb-2">Account Type</label>
+                    <select name="role" id="roleSelect" class="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 focus:border-accent focus:outline-none transition-all">
+                        <option value="consumer">Consumer (Browse & Engage)</option>
+                        <option value="creator">Creator (Upload Photos)</option>
+                    </select>
+                </div>
+                <button type="submit" class="w-full px-6 py-3 rounded-lg bg-accent hover:bg-accent/80 font-semibold transition-all btn-primary">
+                    Create Account
+                </button>
+                <p class="text-center mt-4 text-sm text-gray-400">
+                    Already have an account? <button type="button" onclick="switchToLogin()" class="text-accent hover:underline">Login</button>
+                </p>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Particle background generation
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            const particleCount = 20;
+
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.width = Math.random() * 10 + 5 + 'px';
+                particle.style.height = particle.style.width;
+                particle.style.animationDelay = Math.random() * 10 + 's';
+                particle.style.animationDuration = Math.random() * 5 + 8 + 's';
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        createParticles();
+
+        // Modal functions
+        function openLoginModal() {
+            document.getElementById('loginModal').classList.add('active');
+        }
+
+        function closeLoginModal() {
+            document.getElementById('loginModal').classList.remove('active');
+        }
+
+        function openRegisterModal(role = 'consumer') {
+            document.getElementById('registerModal').classList.add('active');
+            if (role) {
+                document.getElementById('roleSelect').value = role;
+            }
+        }
+
+        function closeRegisterModal() {
+            document.getElementById('registerModal').classList.remove('active');
+        }
+
+        function switchToRegister() {
+            closeLoginModal();
+            openRegisterModal();
+        }
+
+        function switchToLogin() {
+            closeRegisterModal();
+            openLoginModal();
+        }
+
+        // Close modals on outside click
+        window.onclick = function(event) {
+            const loginModal = document.getElementById('loginModal');
+            const registerModal = document.getElementById('registerModal');
+            if (event.target === loginModal) {
+                closeLoginModal();
+            }
+            if (event.target === registerModal) {
+                closeRegisterModal();
+            }
+        }
+
+        // Handle login
+        async function handleLogin(event) {
+            event.preventDefault();
+            const form = event.target;
+            const formData = new FormData(form);
+
+            try {
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        username: formData.get('username'),
+                        password: formData.get('password')
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    
+                    // Redirect based on role
+                    if (data.user.role === 'creator') {
+                        window.location.href = '/creator';
+                    } else {
+                        window.location.href = '/consumer';
+                    }
+                } else {
+                    alert(data.error || 'Login failed');
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                alert('Login failed. Please try again.');
+            }
+        }
+
+        // Handle registration
+        async function handleRegister(event) {
+            event.preventDefault();
+            const form = event.target;
+            const formData = new FormData(form);
+
+            try {
+                const response = await fetch('/api/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        username: formData.get('username'),
+                        email: formData.get('email'),
+                        password: formData.get('password'),
+                        role: formData.get('role')
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    alert('Registration successful! Please login.');
+                    switchToLogin();
+                    form.reset();
+                } else {
+                    alert(data.error || 'Registration failed');
+                }
+            } catch (error) {
+                console.error('Registration error:', error);
+                alert('Registration failed. Please try again.');
+            }
+        }
+
+        // Check if user is already logged in
+        const token = localStorage.getItem('token');
+        const user = JSON.parse(localStorage.getItem('user') || 'null');
+        if (token && user) {
+            window.location.href = user.role === 'creator' ? '/creator' : '/consumer';
+        }
+    </script>
+</body>
+</html>

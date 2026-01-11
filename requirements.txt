@@ -1,6 +1,6 @@
 Flask==3.1.2
 flask-cors==6.0.2
-gunicorn
+gunicorn==23.0.0
 pyodbc==5.3.0
 azure-storage-blob==12.27.1
 Pillow==11.3.0

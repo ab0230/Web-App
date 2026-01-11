@@ -141,15 +141,25 @@
     <div class="max-w-7xl mx-auto px-6 py-8">
         <!-- Upload Section -->
         <div class="glass rounded-2xl p-8 mb-8">
-            <h2 class="text-4xl font-bold mb-6">Upload Your Photos</h2>
+            <h2 class="text-4xl font-bold mb-6">Upload Your Media</h2>
+            
+            <!-- Media Type Selection -->
+            <div class="mb-6 flex gap-4">
+                <button id="imageTypeBtn" onclick="selectMediaType('image')" class="px-6 py-3 rounded-lg bg-[#ff6b6b] font-semibold transition-all btn-primary">
+                    Upload Image
+                </button>
+                <button id="videoTypeBtn" onclick="selectMediaType('video')" class="px-6 py-3 rounded-lg glass hover:bg-white/10 font-semibold transition-all">
+                    Upload Video
+                </button>
+            </div>
             
             <div id="uploadArea" class="upload-area rounded-xl p-12 text-center cursor-pointer">
                 <svg class="w-16 h-16 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
                 </svg>
-                <p class="text-lg mb-2">Drop your photo here or click to browse</p>
-                <p class="text-sm text-gray-400">Supports: JPG, PNG, GIF (Max 16MB)</p>
-                <input type="file" id="photoInput" accept="image/*" class="hidden">
+                <p class="text-lg mb-2" id="uploadText">Drop your image here or click to browse</p>
+                <p class="text-sm text-gray-400" id="uploadSubtext">Supports: JPG, PNG, GIF (Max 16MB)</p>
+                <input type="file" id="mediaInput" accept="image/*" class="hidden">
             </div>
 
             <div id="uploadForm" class="hidden mt-8">
@@ -171,12 +181,18 @@
                     <label class="block text-sm font-semibold mb-2">People Present (comma separated)</label>
                     <input type="text" id="peopleInput" placeholder="John, Sarah, Mike" class="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 focus:border-[#ff6b6b] focus:outline-none transition-all">
                 </div>
+                <div id="uploadProgress" class="hidden mb-6">
+                    <div class="w-full bg-white/10 rounded-full h-2">
+                        <div id="progressBar" class="bg-[#ff6b6b] h-2 rounded-full transition-all" style="width: 0%"></div>
+                    </div>
+                    <p class="text-sm text-gray-400 mt-2 text-center" id="progressText">Uploading...</p>
+                </div>
                 <div class="flex gap-4">
-                    <button onclick="uploadPhoto()" class="px-8 py-3 rounded-lg bg-[#ff6b6b] hover:bg-[#ff6b6b]/80 font-semibold transition-all btn-primary flex items-center gap-2">
+                    <button onclick="uploadMedia()" class="px-8 py-3 rounded-lg bg-[#ff6b6b] hover:bg-[#ff6b6b]/80 font-semibold transition-all btn-primary flex items-center gap-2">
                         <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
                         </svg>
-                        Upload Photo
+                        <span id="uploadButtonText">Upload Image</span>
                     </button>
                     <button onclick="cancelUpload()" class="px-8 py-3 rounded-lg glass hover:bg-white/10 font-semibold transition-all">
                         Cancel
@@ -184,9 +200,10 @@
                 </div>
             </div>
 
-            <div id="photoPreview" class="hidden mt-6">
+            <div id="mediaPreview" class="hidden mt-6">
                 <p class="text-sm font-semibold mb-2">Preview:</p>
-                <img id="previewImage" class="rounded-lg max-h-64 object-cover">
+                <img id="previewImage" class="hidden rounded-lg max-h-64 object-cover">
+                <video id="previewVideo" class="hidden rounded-lg max-h-64" controls></video>
             </div>
         </div>
 
@@ -195,7 +212,7 @@
             <div class="glass rounded-2xl p-6">
                 <div class="flex items-center justify-between">
                     <div>
-                        <p class="text-sm text-gray-400 mb-1">Total Photos</p>
+                        <p class="text-sm text-gray-400 mb-1">Total Media</p>
                         <p class="text-3xl font-bold" id="totalPhotos">0</p>
                     </div>
                     <div class="w-12 h-12 bg-[#ff6b6b]/20 rounded-full flex items-center justify-center">
@@ -234,221 +251,340 @@
             </div>
         </div>
 
-        <!-- My Photos -->
+        <!-- My Media -->
         <div class="glass rounded-2xl p-8">
-            <h2 class="text-3xl font-bold mb-6">My Photos</h2>
+            <h2 class="text-3xl font-bold mb-6">My Media</h2>
             <div id="myPhotos" class="photo-grid">
                 <div class="col-span-full text-center py-12 text-gray-400">
                     <svg class="w-16 h-16 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                     </svg>
-                    <p>No photos uploaded yet. Start sharing your moments!</p>
+                    <p>No media uploaded yet. Start sharing your moments!</p>
                 </div>
             </div>
         </div>
     </div>
 
-    <script>
-        const token = localStorage.getItem('token');
-        const user = JSON.parse(localStorage.getItem('user') || 'null');
 
-        if (!token || !user || user.role !== 'creator') {
-            window.location.href = '/';
+  <script>
+    const token = localStorage.getItem('token');
+    const user = JSON.parse(localStorage.getItem('user') || 'null');
+
+    if (!token || !user) {
+        window.location.href = '/';
+    }
+
+    if (user.role !== 'creator') {
+        alert('Access denied. Creator account required.');
+        window.location.href = '/consumer';
+    }
+
+    document.getElementById('username').textContent = user.username;
+
+    let selectedFile = null;
+    let currentMediaType = 'image';
+
+    // Media type selection
+    function selectMediaType(type) {
+        currentMediaType = type;
+        const imageBtn = document.getElementById('imageTypeBtn');
+        const videoBtn = document.getElementById('videoTypeBtn');
+        const uploadText = document.getElementById('uploadText');
+        const uploadSubtext = document.getElementById('uploadSubtext');
+        const mediaInput = document.getElementById('mediaInput');
+        const uploadButtonText = document.getElementById('uploadButtonText');
+
+        if (type === 'image') {
+            imageBtn.className = 'px-6 py-3 rounded-lg bg-[#ff6b6b] font-semibold transition-all btn-primary';
+            videoBtn.className = 'px-6 py-3 rounded-lg glass hover:bg-white/10 font-semibold transition-all';
+            uploadText.textContent = 'Drop your image here or click to browse';
+            uploadSubtext.textContent = 'Supports: JPG, PNG, GIF (Max 16MB)';
+            mediaInput.accept = 'image/*';
+            uploadButtonText.textContent = 'Upload Image';
+        } else {
+            videoBtn.className = 'px-6 py-3 rounded-lg bg-[#ff6b6b] font-semibold transition-all btn-primary';
+            imageBtn.className = 'px-6 py-3 rounded-lg glass hover:bg-white/10 font-semibold transition-all';
+            uploadText.textContent = 'Drop your video here or click to browse';
+            uploadSubtext.textContent = 'Supports: MP4, MOV, AVI, WEBM (Max 100MB)';
+            mediaInput.accept = 'video/*';
+            uploadButtonText.textContent = 'Upload Video';
+        }
+        
+        // Reset
+        cancelUpload();
+    }
+
+    // Upload area interactions
+    const uploadArea = document.getElementById('uploadArea');
+    const mediaInput = document.getElementById('mediaInput');
+
+    uploadArea.addEventListener('click', () => {
+        mediaInput.click();
+    });
+
+    uploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadArea.classList.add('dragover');
+    });
+
+    uploadArea.addEventListener('dragleave', () => {
+        uploadArea.classList.remove('dragover');
+    });
+
+    uploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadArea.classList.remove('dragover');
+        
+        if (e.dataTransfer.files.length > 0) {
+            handleFileSelect(e.dataTransfer.files[0]);
+        }
+    });
+
+    mediaInput.addEventListener('change', (e) => {
+        if (e.target.files.length > 0) {
+            handleFileSelect(e.target.files[0]);
+        }
+    });
+
+    function handleFileSelect(file) {
+        selectedFile = file;
+        
+        // Show form and preview
+        document.getElementById('uploadForm').classList.remove('hidden');
+        document.getElementById('mediaPreview').classList.remove('hidden');
+        
+        // Show preview
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            if (currentMediaType === 'image') {
+                document.getElementById('previewImage').src = e.target.result;
+                document.getElementById('previewImage').classList.remove('hidden');
+                document.getElementById('previewVideo').classList.add('hidden');
+            } else {
+                document.getElementById('previewVideo').src = e.target.result;
+                document.getElementById('previewVideo').classList.remove('hidden');
+                document.getElementById('previewImage').classList.add('hidden');
+            }
+        };
+        reader.readAsDataURL(file);
+        
+        // Auto-fill title from filename
+        if (!document.getElementById('titleInput').value) {
+            const filename = file.name.replace(/\.[^/.]+$/, ""); // Remove extension
+            document.getElementById('titleInput').value = filename;
+        }
+    }
+
+    async function uploadMedia() {
+        if (!selectedFile) {
+            alert('Please select a file first');
+            return;
         }
 
-        document.getElementById('username').textContent = user.username;
-
-        let selectedFile = null;
-
-        // Upload area drag and drop
-        const uploadArea = document.getElementById('uploadArea');
-        const photoInput = document.getElementById('photoInput');
-        const uploadFormDiv = document.getElementById('uploadForm');
-        const photoPreview = document.getElementById('photoPreview');
-        const previewImage = document.getElementById('previewImage');
-
-        uploadArea.addEventListener('click', () => photoInput.click());
-
-        uploadArea.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            uploadArea.classList.add('dragover');
-        });
-
-        uploadArea.addEventListener('dragleave', () => {
-            uploadArea.classList.remove('dragover');
-        });
-
-        uploadArea.addEventListener('drop', (e) => {
-            e.preventDefault();
-            uploadArea.classList.remove('dragover');
-            const file = e.dataTransfer.files[0];
-            if (file && file.type.startsWith('image/')) {
-                handleFileSelect(file);
-            }
-        });
-
-        photoInput.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                handleFileSelect(file);
-            }
-        });
-
-        function handleFileSelect(file) {
-            selectedFile = file;
-            uploadFormDiv.classList.remove('hidden');
-            photoPreview.classList.remove('hidden');
-
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                previewImage.src = e.target.result;
-            };
-            reader.readAsDataURL(file);
+        const title = document.getElementById('titleInput').value.trim();
+        if (!title) {
+            alert('Please enter a title');
+            return;
         }
 
-        function cancelUpload() {
-            selectedFile = null;
-            uploadFormDiv.classList.add('hidden');
-            photoPreview.classList.add('hidden');
-            document.getElementById('titleInput').value = '';
-            document.getElementById('locationInput').value = '';
-            document.getElementById('captionInput').value = '';
-            document.getElementById('peopleInput').value = '';
-            photoInput.value = '';
-        }
+        const formData = new FormData();
+        formData.append('media', selectedFile);
+        formData.append('title', title);
+        formData.append('caption', document.getElementById('captionInput').value.trim());
+        formData.append('location', document.getElementById('locationInput').value.trim());
+        formData.append('people_present', document.getElementById('peopleInput').value.trim());
 
-        // Handle photo upload
-        async function uploadPhoto() {
-            if (!selectedFile) {
-                alert('Please select a photo');
-                return;
-            }
+        const progressBar = document.getElementById('progressBar');
+        const progressText = document.getElementById('progressText');
+        const uploadProgress = document.getElementById('uploadProgress');
 
-            const title = document.getElementById('titleInput').value;
-            if (!title) {
-                alert('Title is required');
-                return;
-            }
+        try {
+            uploadProgress.classList.remove('hidden');
+            progressBar.style.width = '0%';
+            progressText.textContent = 'Uploading...';
 
-            const formData = new FormData();
-            formData.append('photo', selectedFile);
-            formData.append('title', title);
-            formData.append('caption', document.getElementById('captionInput').value);
-            formData.append('location', document.getElementById('locationInput').value);
-            formData.append('people_present', document.getElementById('peopleInput').value);
+            const xhr = new XMLHttpRequest();
 
-            try {
-                const response = await fetch('/api/photos', {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: formData
-                });
-
-                const data = await response.json();
-
-                if (response.ok) {
-                    alert('Photo uploaded successfully!');
-                    cancelUpload();
-                    loadMyPhotos();
-                    loadStats();
-                } else {
-                    alert(data.error || 'Upload failed');
+            xhr.upload.addEventListener('progress', (e) => {
+                if (e.lengthComputable) {
+                    const percentComplete = (e.loaded / e.total) * 100;
+                    progressBar.style.width = percentComplete + '%';
+                    progressText.textContent = `Uploading... ${Math.round(percentComplete)}%`;
                 }
-            } catch (error) {
-                console.error('Upload error:', error);
+            });
+
+            xhr.addEventListener('load', () => {
+                if (xhr.status === 201) {
+                    progressText.textContent = 'Upload complete!';
+                    setTimeout(() => {
+                        alert('Media uploaded successfully!');
+                        cancelUpload();
+                        loadMyPhotos();
+                        loadStats();
+                    }, 500);
+                } else {
+                    const response = JSON.parse(xhr.responseText);
+                    alert(response.error || 'Upload failed');
+                    uploadProgress.classList.add('hidden');
+                }
+            });
+
+            xhr.addEventListener('error', () => {
                 alert('Upload failed. Please try again.');
-            }
+                uploadProgress.classList.add('hidden');
+            });
+
+            xhr.open('POST', '/api/media');
+            xhr.setRequestHeader('Authorization', `Bearer ${token}`);
+            xhr.send(formData);
+
+        } catch (error) {
+            console.error('Upload error:', error);
+            alert('Upload failed. Please try again.');
+            uploadProgress.classList.add('hidden');
         }
+    }
 
-        // Load my photos
-        async function loadMyPhotos() {
-            try {
-                const response = await fetch('/api/photos');
-                const data = await response.json();
+    function cancelUpload() {
+        selectedFile = null;
+        document.getElementById('uploadForm').classList.add('hidden');
+        document.getElementById('mediaPreview').classList.add('hidden');
+        document.getElementById('uploadProgress').classList.add('hidden');
+        document.getElementById('titleInput').value = '';
+        document.getElementById('captionInput').value = '';
+        document.getElementById('locationInput').value = '';
+        document.getElementById('peopleInput').value = '';
+        mediaInput.value = '';
+    }
 
-                if (response.ok) {
-                    const myPhotos = data.photos.filter(p => p.user_id === user.id);
-                    const container = document.getElementById('myPhotos');
+    // Load creator's photos
+    async function loadMyPhotos() {
+        try {
+            const response = await fetch(`/api/media?user_id=${user.id}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const data = await response.json();
 
-                    if (myPhotos.length === 0) {
-                        container.innerHTML = `
-                            <div class="col-span-full text-center py-12 text-gray-400">
-                                <svg class="w-16 h-16 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                                </svg>
-                                <p>No photos uploaded yet. Start sharing your moments!</p>
-                            </div>
-                        `;
-                    } else {
-                        container.innerHTML = myPhotos.map(photo => `
-                            <div class="photo-card glass">
-                                <img src="${photo.thumbnail_url}" alt="${photo.title}">
-                                <div class="p-4">
-                                    <h3 class="font-bold text-lg mb-2">${photo.title}</h3>
-                                    <p class="text-sm text-gray-400 mb-2">${photo.caption || 'No caption'}</p>
-                                    <div class="flex items-center justify-between text-sm">
-                                        <div class="flex items-center gap-4">
-                                            <span class="flex items-center gap-1">
-                                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                                    <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/>
-                                                    <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"/>
-                                                </svg>
-                                                ${photo.views}
-                                            </span>
-                                            <span class="flex items-center gap-1">
-                                                <svg class="w-4 h-4 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
-                                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-                                                </svg>
-                                                ${photo.avg_rating}
-                                            </span>
-                                        </div>
-                                        <span class="text-gray-500">${photo.comment_count} comments</span>
-                                    </div>
+            const container = document.getElementById('myPhotos');
+
+            if (response.ok && data.media.length > 0) {
+                container.innerHTML = '';
+                data.media.forEach(photo => {
+                    const card = document.createElement('div');
+                    card.className = 'photo-card glass rounded-2xl overflow-hidden';
+                    
+                    const mediaIcon = photo.media_type === 'video' ? 
+                        `<div class="absolute inset-0 flex items-center justify-center bg-black/30">
+                            <svg class="w-12 h-12 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"/>
+                            </svg>
+                        </div>` : '';
+                    
+                    card.innerHTML = `
+                        <div class="relative">
+                            <img src="${photo.thumbnail_url}" alt="${photo.title}">
+                            ${mediaIcon}
+                        </div>
+                        <div class="p-4">
+                            <h3 class="font-bold text-lg mb-2">${photo.title}</h3>
+                            <div class="flex items-center justify-between text-sm mb-3">
+                                <div class="flex items-center gap-3">
+                                    <span class="flex items-center gap-1">
+                                        <svg class="w-4 h-4 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
+                                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                        </svg>
+                                        ${photo.avg_rating}
+                                    </span>
+                                    <span class="flex items-center gap-1 text-gray-400">
+                                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                            <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/>
+                                            <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"/>
+                                        </svg>
+                                        ${photo.views}
+                                    </span>
                                 </div>
                             </div>
-                        `).join('');
-                    }
-                }
-            } catch (error) {
-                console.error('Error loading photos:', error);
+                            <button onclick="deleteMedia(${photo.id})" class="w-full px-4 py-2 rounded-lg bg-red-500/20 hover:bg-red-500/30 text-red-400 text-sm font-semibold transition-all">
+                                Delete
+                            </button>
+                        </div>
+                    `;
+                    container.appendChild(card);
+                });
+            } else {
+                container.innerHTML = `
+                    <div class="col-span-full text-center py-12 text-gray-400">
+                        <svg class="w-16 h-16 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                        </svg>
+                        <p>No media uploaded yet. Start sharing your moments!</p>
+                    </div>
+                `;
             }
+        } catch (error) {
+            console.error('Error loading photos:', error);
+        }
+    }
+
+    async function deleteMedia(mediaId) {
+        if (!confirm('Are you sure you want to delete this media?')) {
+            return;
         }
 
-        // Load stats
-        async function loadStats() {
-            try {
-                const response = await fetch('/api/photos');
+        try {
+            const response = await fetch(`/api/media/${mediaId}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (response.ok) {
+                alert('Media deleted successfully');
+                loadMyPhotos();
+                loadStats();
+            } else {
                 const data = await response.json();
-
-                if (response.ok) {
-                    const myPhotos = data.photos.filter(p => p.user_id === user.id);
-                    
-                    document.getElementById('totalPhotos').textContent = myPhotos.length;
-                    
-                    const totalViews = myPhotos.reduce((sum, p) => sum + p.views, 0);
-                    document.getElementById('totalViews').textContent = totalViews;
-                    
-                    const avgRating = myPhotos.length > 0 
-                        ? (myPhotos.reduce((sum, p) => sum + p.avg_rating, 0) / myPhotos.length).toFixed(1)
-                        : 0;
-                    document.getElementById('avgRating').textContent = avgRating;
-                }
-            } catch (error) {
-                console.error('Error loading stats:', error);
+                alert(data.error || 'Failed to delete media');
             }
+        } catch (error) {
+            console.error('Error deleting media:', error);
+            alert('Failed to delete media');
         }
+    }
 
-        function logout() {
-            localStorage.removeItem('token');
-            localStorage.removeItem('user');
-            window.location.href = '/';
+    // Load creator stats
+    async function loadStats() {
+        try {
+            const response = await fetch(`/api/media?user_id=${user.id}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const data = await response.json();
+
+            if (response.ok) {
+                const totalPhotos = data.media.length;
+                const totalViews = data.media.reduce((sum, photo) => sum + photo.views, 0);
+                const avgRating = data.media.length > 0
+                    ? (data.media.reduce((sum, photo) => sum + photo.avg_rating, 0) / data.media.length).toFixed(1)
+                    : 0;
+
+                document.getElementById('totalPhotos').textContent = totalPhotos;
+                document.getElementById('totalViews').textContent = totalViews;
+                document.getElementById('avgRating').textContent = avgRating;
+            }
+        } catch (error) {
+            console.error('Error loading stats:', error);
         }
+    }
 
-        // Initial load
-        loadMyPhotos();
-        loadStats();
-    </script>
+    function logout() {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.location.href = '/';
+    }
+
+    // Initialize
+    loadMyPhotos();
+    loadStats();
+
+</script>
 </body>
 </html>
